@@ -29,7 +29,7 @@
 			const tiltWallShape = new THREE.Shape();
 			tiltWallShape.moveTo(0, 0);
 			tiltWallShape.lineTo(1, 0);
-			tiltWallShape.lineTo(1, .75);
+			tiltWallShape.lineTo(1, 1);
 			tiltWallShape.lineTo(0, 1);
 			tiltWallShape.lineTo(0, 0);
 			
@@ -60,8 +60,8 @@
 			const wallShape = new THREE.Shape();
 			wallShape.moveTo(0, 0);
 			wallShape.lineTo(1.4, 0);
-			wallShape.lineTo(1.4, .75);
-			wallShape.lineTo(0, .75);
+			wallShape.lineTo(1.4, 1);
+			wallShape.lineTo(0, 1);
 			wallShape.lineTo(0, 0);
 			const wallGeometry = new THREE.ExtrudeBufferGeometry([wallShape], {
 				steps: 1,
@@ -78,33 +78,8 @@
 			wallB.translateZ(-1.8);
 			house.add(wallB);
 
-			// Draw roof
-			const roofShape = new THREE.Shape();
-			roofShape.moveTo(-0.2, 0);
-			roofShape.lineTo(1.6, 0);
-			roofShape.lineTo(1.6, 1.2);
-			roofShape.lineTo(-0.2, 1.2);
-			roofShape.lineTo(-0.2, 0);
-			const roofGeometry = new THREE.ExtrudeBufferGeometry([roofShape], {
-				steps: 1,
-				depth: .2,
-				bevelEnabled: false,
-				curveSegments: 32
-			});
-			const roofA = new THREE.Mesh(roofGeometry, new THREE.MeshStandardMaterial({ color: 0x9999ff }));
-			roofA.rotateY(-Math.PI / 2);
-			roofA.rotateX(-Math.PI / 2 - 0.25);
-			roofA.translateZ(1);
-			roofA.translateY(-0.4);
-			house.add(roofA);
-
-			const roofB = roofA.clone();
-			roofB.rotateZ(Math.PI);
-			roofB.rotateX(-0.5);
-			roofB.translateY(-0.2);
-			roofB.translateZ(-0.05);
-			roofB.translateX(-1.4);
-			house.add(roofB);
+	
+			
 
 			const ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(10, 10), new THREE.MeshStandardMaterial({ color: 0xffff99 }));
 			ground.rotateX(-Math.PI / 2);
@@ -120,14 +95,7 @@
 			mesh = [houseGroup, house];
 
 			camera.lookAt(houseGroup.position);
-
-			let step = 7;
-
-			//setInterval(() => {
-			step = (step + 1) % (house.children.length + 1);
-
-			house.children.forEach((mesh, index) => mesh.visible = index < step);
-			// }, 500);
+			house.children.forEach((mesh, index) => mesh.visible = index < house.children.length);
 		};
 
 		const init = () => {
