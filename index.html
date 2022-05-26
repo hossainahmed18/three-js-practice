@@ -1,160 +1,144 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="utf-8" />
+    <title>My first three.js app</title>
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
 
-<head>
-	<meta charset="utf-8">
-	<title>My first three.js app</title>
-	<style>
-		body {
-			margin: 0;
-		}
-	</style>
-</head>
+  <body>
+    <script type="module">
+      import * as THREE from "./static/Three.js";
+      import { OrbitControls } from "./static/OrbitControls.js";
 
-<body>
-	<script type="module">
-		import * as THREE from "./static/Three.js";
-		import { OrbitControls } from "./static/OrbitControls.js";
+      let camera, scene, renderer, controls, mesh;
 
-		let camera, scene, renderer, controls, mesh;
+      const createWorld = () => {
+        const houseGroup = new THREE.Group();
+        const house = new THREE.Object3D();
 
-		const createWorld = () => {
-			const houseGroup = new THREE.Group();
-			const house = new THREE.Object3D();
+        houseGroup.add(house);
+        scene.add(houseGroup);
+        const geometry = new THREE.BufferGeometry();
 
-			houseGroup.add(house);
-			scene.add(houseGroup);
+        const vertices = [
+          // front
+          { pos: [-1, -1, 1] },
+          { pos: [1, -1, 1] },
+          { pos: [-1, 1, 1] },
 
-			const tiltWallShape1 = new THREE.Shape();
-			tiltWallShape1.moveTo(0, 0);
-			tiltWallShape1.lineTo(10, 0);
-			tiltWallShape1.lineTo(10, 5);
-			tiltWallShape1.lineTo(0, 5);
-			tiltWallShape1.lineTo(0, 0);
+          { pos: [-1, 1, 1] },
+          { pos: [1, -1, 1] },
+          { pos: [1, 1, 1] },
+          // right
+          { pos: [1, -1, 1] },
+          { pos: [1, -1, -1] },
+          { pos: [1, 1, 1] },
 
-			const tiltWallShape2 = new THREE.Shape();
-			tiltWallShape2.moveTo(2, 0);
-			tiltWallShape2.lineTo(10, 0);
-			tiltWallShape2.lineTo(10, 5);
-			tiltWallShape2.lineTo(2, 5);
-			tiltWallShape2.lineTo(2, 0);
+          { pos: [1, 1, 1] },
+          { pos: [1, -1, -1] },
+          { pos: [1, 1, -1] },
+          // back
+          { pos: [1, -1, -1] },
+          { pos: [-1, -1, -1] },
+          { pos: [1, 1, -1] },
 
-			const tiltWallShape3 = new THREE.Shape();
-			tiltWallShape3.moveTo(0, 0);
-			tiltWallShape3.lineTo(9, 0);
-			tiltWallShape3.lineTo(9, 5);
-			tiltWallShape3.lineTo(0, 5);
-			tiltWallShape3.lineTo(0, 0);
+          { pos: [1, 1, -1] },
+          { pos: [-1, -1, -1] },
+          { pos: [-1, 1, -1] },
+          // left
+          { pos: [-1, -1, -1] },
+          { pos: [-1, -1, 1] },
+          { pos: [-1, 1, -1] },
 
-			const tiltWallGeometry2 = new THREE.ExtrudeBufferGeometry([tiltWallShape2], {
-				steps: 1,
-				depth: .2,
-				bevelEnabled: false,
-				curveSegments: 32
-			});
+          { pos: [-1, 1, -1] },
+          { pos: [-1, -1, 1] },
+          { pos: [-1, 1, 1] },
+          // top
+          { pos: [1, 1, -1] },
+          { pos: [-1, 1, -1] },
+          { pos: [1, 1, 1] },
 
-			const tiltWallGeometry = new THREE.ExtrudeBufferGeometry([tiltWallShape1], {
-				steps: 1,
-				depth: .2,
-				bevelEnabled: false,
-				curveSegments: 32
-			});
+          { pos: [1, 1, 1] },
+          { pos: [-1, 1, -1] },
+          { pos: [-1, 1, 1] },
+          // bottom
+          { pos: [1, -1, 1] },
+          { pos: [-1, -1, 1] },
+          { pos: [1, -1, -1] },
 
-			const tiltWallGeometry3 = new THREE.ExtrudeBufferGeometry([tiltWallShape3], {
-				steps: 1,
-				depth: .2,
-				bevelEnabled: false,
-				curveSegments: 32
-			});
+          { pos: [1, -1, -1] },
+          { pos: [-1, -1, 1] },
+          { pos: [-1, -1, -1] },
+        ];
+        const positions = [];
+        for (const vertex of vertices) {
+          positions.push(...vertex.pos);
+        }
+		console.log(positions);
+        geometry.setAttribute("position",new THREE.BufferAttribute(new Float32Array(positions), 3));
+        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const mesh1 = new THREE.Mesh(geometry, material);
+        house.add(mesh1);
 
+        const ground = new THREE.Mesh(
+          new THREE.PlaneBufferGeometry(30, 30),
+          new THREE.MeshStandardMaterial({ color: 0xffff99 })
+        );
+        ground.rotateX(-Math.PI / 2);
+		ground.translateZ(-1);
+        houseGroup.add(ground);
 
-			const tiltWallA = new THREE.Mesh(tiltWallGeometry, new THREE.MeshStandardMaterial({ color: 0xff9999 }));
-			house.add(tiltWallA);
+        house.traverse((mesh) =>
+          mesh !== house ? (mesh.visible = false) : null
+        );
 
+        mesh = [houseGroup, house];
 
-			const tiltWallB = tiltWallA.clone();
-			tiltWallB.translateX(-10);
-			house.add(tiltWallB);
+        camera.lookAt(houseGroup.position);
+        house.children.forEach(
+          (mesh, index) => (mesh.visible = index < house.children.length)
+        );
+      };
 
+      const init = () => {
+        camera = new THREE.PerspectiveCamera(
+          60,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          1000.0
+        );
+        camera.position.set(0, 15, 15);
 
-			const tiltWallC = new THREE.Mesh(tiltWallGeometry3, new THREE.MeshStandardMaterial({ color: 0xff9999 }));;
-			tiltWallC.rotateY(-Math.PI / 2);
-			house.add(tiltWallC);
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x333333);
 
+        scene.add(new THREE.HemisphereLight(0xffffcc, 0x19bbdc, 1));
 
-			const tiltWallD = new THREE.Mesh(tiltWallGeometry2, new THREE.MeshStandardMaterial({ color: 0xff9999 }));
-			tiltWallD.translateX(10);
-			tiltWallD.rotateY(-Math.PI / 2)
-			house.add(tiltWallD);
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
 
+        document.body.appendChild(renderer.domElement);
 
-			const tiltWallE = tiltWallA.clone();
-			tiltWallE.rotateY(-Math.PI / 2);
-			tiltWallE.translateZ(10);
-			house.add(tiltWallE);
+        controls = new OrbitControls(camera, renderer.domElement);
 
-			const tiltWallF = tiltWallA.clone();
-			tiltWallF.translateZ(10);
-			house.add(tiltWallF);
+        createWorld();
+      };
 
-			const tiltWallG = tiltWallF.clone();
-			tiltWallG.translateX(-10);
-			house.add(tiltWallG);
+      const animate = () => {
+        requestAnimationFrame(animate);
 
+        controls.update();
 
+        renderer.render(scene, camera);
+      };
 
-			const ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(30, 30), new THREE.MeshStandardMaterial({ color: 0xffff99 }));
-			ground.rotateX(-Math.PI / 2);
-			ground.translateX(-0.5);
-			ground.translateY(-0.5);
-			houseGroup.add(ground);
-
-			house.translateX(-0.5);
-			house.translateZ(-0.5);
-
-
-
-
-
-
-			house.traverse(mesh => (mesh !== house ? mesh.visible = false : null));
-
-			mesh = [houseGroup, house];
-
-			camera.lookAt(houseGroup.position);
-			house.children.forEach((mesh, index) => mesh.visible = index < house.children.length);
-		};
-
-		const init = () => {
-			camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000.0);
-			camera.position.set(0, 15, 15);
-
-			scene = new THREE.Scene();
-			scene.background = new THREE.Color(0x333333);
-
-			scene.add(new THREE.HemisphereLight(0xffffcc, 0x19bbdc, 1));
-
-			renderer = new THREE.WebGLRenderer({ antialias: true });
-			renderer.setSize(window.innerWidth, window.innerHeight);
-
-			document.body.appendChild(renderer.domElement);
-
-			controls = new OrbitControls(camera, renderer.domElement);
-
-			createWorld();
-		}
-
-		const animate = () => {
-			requestAnimationFrame(animate);
-
-			controls.update();
-
-			renderer.render(scene, camera);
-		}
-
-		init();
-		animate();
-	</script>
-</body>
-
+      init();
+      animate();
+    </script>
+  </body>
 </html>
