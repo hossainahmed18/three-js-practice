@@ -24,42 +24,72 @@
 
 			houseGroup.add(house);
 			scene.add(houseGroup);
-            
+
 			const tiltWallShape1 = new THREE.Shape();
 			tiltWallShape1.moveTo(0, 0);
 			tiltWallShape1.lineTo(10, 0);
 			tiltWallShape1.lineTo(10, 5);
 			tiltWallShape1.lineTo(0, 5);
 			tiltWallShape1.lineTo(0, 0);
-			
+
+			const tiltWallShape2 = new THREE.Shape();
+			tiltWallShape2.moveTo(2, 0);
+			tiltWallShape2.lineTo(10, 0);
+			tiltWallShape2.lineTo(10, 5);
+			tiltWallShape2.lineTo(2, 5);
+			tiltWallShape2.lineTo(2, 0);
+
+			const tiltWallShape3 = new THREE.Shape();
+			tiltWallShape3.moveTo(0, 0);
+			tiltWallShape3.lineTo(9, 0);
+			tiltWallShape3.lineTo(9, 5);
+			tiltWallShape3.lineTo(0, 5);
+			tiltWallShape3.lineTo(0, 0);
+
+			const tiltWallGeometry2 = new THREE.ExtrudeBufferGeometry([tiltWallShape2], {
+				steps: 1,
+				depth: .2,
+				bevelEnabled: false,
+				curveSegments: 32
+			});
+
 			const tiltWallGeometry = new THREE.ExtrudeBufferGeometry([tiltWallShape1], {
 				steps: 1,
 				depth: .2,
 				bevelEnabled: false,
 				curveSegments: 32
 			});
-			
+
+			const tiltWallGeometry3 = new THREE.ExtrudeBufferGeometry([tiltWallShape3], {
+				steps: 1,
+				depth: .2,
+				bevelEnabled: false,
+				curveSegments: 32
+			});
+
 
 			const tiltWallA = new THREE.Mesh(tiltWallGeometry, new THREE.MeshStandardMaterial({ color: 0xff9999 }));
 			house.add(tiltWallA);
 
-           
+
 			const tiltWallB = tiltWallA.clone();
 			tiltWallB.translateX(-10);
 			house.add(tiltWallB);
-			
-            
-			const tiltWallC = tiltWallA.clone();
-			tiltWallC.rotateY(-Math.PI/2);
-			house.add(tiltWallC);
-			
 
-			const tiltWallD = tiltWallC.clone();
-			tiltWallD.translateZ(-10);
-			console.log(tiltWallD.setSize);
+
+			const tiltWallC = new THREE.Mesh(tiltWallGeometry3, new THREE.MeshStandardMaterial({ color: 0xff9999 }));;
+			tiltWallC.rotateY(-Math.PI / 2);
+			house.add(tiltWallC);
+
+
+			const tiltWallD = new THREE.Mesh(tiltWallGeometry2, new THREE.MeshStandardMaterial({ color: 0xff9999 }));
+			tiltWallD.translateX(10);
+			tiltWallD.rotateY(-Math.PI / 2)
 			house.add(tiltWallD);
 
-			const tiltWallE = tiltWallC.clone();
+
+			const tiltWallE = tiltWallA.clone();
+			tiltWallE.rotateY(-Math.PI / 2);
 			tiltWallE.translateZ(10);
 			house.add(tiltWallE);
 
@@ -70,8 +100,8 @@
 			const tiltWallG = tiltWallF.clone();
 			tiltWallG.translateX(-10);
 			house.add(tiltWallG);
-			
-			
+
+
 
 			const ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(30, 30), new THREE.MeshStandardMaterial({ color: 0xffff99 }));
 			ground.rotateX(-Math.PI / 2);
@@ -85,7 +115,7 @@
 
 
 
-			
+
 
 			house.traverse(mesh => (mesh !== house ? mesh.visible = false : null));
 
@@ -97,7 +127,7 @@
 
 		const init = () => {
 			camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000.0);
-			camera.position.set(-5, 5, 7);
+			camera.position.set(0, 15, 15);
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color(0x333333);
