@@ -1,144 +1,141 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>My first three.js app</title>
-    <style>
-      body {
-        margin: 0;
-      }
-    </style>
-  </head>
 
-  <body>
-    <script type="module">
-      import * as THREE from "./static/Three.js";
-      import { OrbitControls } from "./static/OrbitControls.js";
+<head>
+  <meta charset="utf-8" />
+  <title>My first three.js app</title>
+  <style>
+    body {
+      margin: 0;
+    }
+  </style>
+</head>
 
-      let camera, scene, renderer, controls, mesh;
+<body>
+  <script type="module">
+    import * as THREE from "./static/Three.js";
+    import { OrbitControls } from "./static/OrbitControls.js";
 
-      const createWorld = () => {
-        const houseGroup = new THREE.Group();
-        const house = new THREE.Object3D();
+    let camera, scene, renderer, controls, mesh;
 
-        houseGroup.add(house);
-        scene.add(houseGroup);
-        const geometry = new THREE.BufferGeometry();
+    const createWorld = () => {
+      const houseGroup = new THREE.Group();
+      const house = new THREE.Object3D();
 
-        const vertices = [
-          // front
-          { pos: [-1, -1, 1] },
-          { pos: [1, -1, 1] },
-          { pos: [-1, 1, 1] },
+      houseGroup.add(house);
+      scene.add(houseGroup);
+      const geometry = new THREE.BufferGeometry();
 
-          { pos: [-1, 1, 1] },
-          { pos: [1, -1, 1] },
-          { pos: [1, 1, 1] },
-          // right
-          { pos: [1, -1, 1] },
-          { pos: [1, -1, -1] },
-          { pos: [1, 1, 1] },
+      const vertices = new Float32Array([
+        // front
+        -1, -1, 1,
+        1, -1, 1,
+        -1, 1, 1,
 
-          { pos: [1, 1, 1] },
-          { pos: [1, -1, -1] },
-          { pos: [1, 1, -1] },
-          // back
-          { pos: [1, -1, -1] },
-          { pos: [-1, -1, -1] },
-          { pos: [1, 1, -1] },
+        -1, 1, 1,
+        1, -1, 1,
+        1, 1, 1,
+        // right
+        1, -1, 1,
+        1, -1, -1,
+        1, 1, 1,
 
-          { pos: [1, 1, -1] },
-          { pos: [-1, -1, -1] },
-          { pos: [-1, 1, -1] },
-          // left
-          { pos: [-1, -1, -1] },
-          { pos: [-1, -1, 1] },
-          { pos: [-1, 1, -1] },
+        1, 1, 1,
+        1, -1, -1,
+        1, 1, -1,
+        // back
+        1, -1, -1,
+        -1, -1, -1,
+        1, 1, -1,
 
-          { pos: [-1, 1, -1] },
-          { pos: [-1, -1, 1] },
-          { pos: [-1, 1, 1] },
-          // top
-          { pos: [1, 1, -1] },
-          { pos: [-1, 1, -1] },
-          { pos: [1, 1, 1] },
+        1, 1, -1,
+        -1, -1, -1,
+        -1, 1, -1,
+        // left
+        -1, -1, -1,
+        -1, -1, 1,
+        -1, 1, -1,
 
-          { pos: [1, 1, 1] },
-          { pos: [-1, 1, -1] },
-          { pos: [-1, 1, 1] },
-          // bottom
-          { pos: [1, -1, 1] },
-          { pos: [-1, -1, 1] },
-          { pos: [1, -1, -1] },
+        -1, 1, -1,
+        -1, -1, 1,
+        -1, 1, 1,
+        // top
+        1, 1, -1,
+        -1, 1, -1,
+        1, 1, 1,
 
-          { pos: [1, -1, -1] },
-          { pos: [-1, -1, 1] },
-          { pos: [-1, -1, -1] },
-        ];
-        const positions = [];
-        for (const vertex of vertices) {
-          positions.push(...vertex.pos);
-        }
-		console.log(positions);
-        geometry.setAttribute("position",new THREE.BufferAttribute(new Float32Array(positions), 3));
-        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        const mesh1 = new THREE.Mesh(geometry, material);
-        house.add(mesh1);
+        1, 1, 1,
+        -1, 1, -1,
+        -1, 1, 1,
+        // bottom
+        1, -1, 1,
+        -1, -1, 1,
+        1, -1, -1,
 
-        const ground = new THREE.Mesh(
-          new THREE.PlaneBufferGeometry(30, 30),
-          new THREE.MeshStandardMaterial({ color: 0xffff99 })
-        );
-        ground.rotateX(-Math.PI / 2);
-		ground.translateZ(-1);
-        houseGroup.add(ground);
+        1, -1, -1,
+        -1, -1, 1,
+        -1, -1, -1,
+      ]);
+      geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
+      const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+      const mesh1 = new THREE.Mesh(geometry, material);
+      house.add(mesh1);
 
-        house.traverse((mesh) =>
-          mesh !== house ? (mesh.visible = false) : null
-        );
+      const ground = new THREE.Mesh(
+        new THREE.PlaneBufferGeometry(30, 30),
+        new THREE.MeshStandardMaterial({ color: 0xffff99 })
+      );
+      ground.rotateX(-Math.PI / 2);
+      ground.translateZ(-1);
+      houseGroup.add(ground);
 
-        mesh = [houseGroup, house];
+      house.traverse((mesh) =>
+        mesh !== house ? (mesh.visible = false) : null
+      );
 
-        camera.lookAt(houseGroup.position);
-        house.children.forEach(
-          (mesh, index) => (mesh.visible = index < house.children.length)
-        );
-      };
+      mesh = [houseGroup, house];
 
-      const init = () => {
-        camera = new THREE.PerspectiveCamera(
-          60,
-          window.innerWidth / window.innerHeight,
-          0.1,
-          1000.0
-        );
-        camera.position.set(0, 15, 15);
+      camera.lookAt(houseGroup.position);
+      house.children.forEach(
+        (mesh, index) => (mesh.visible = index < house.children.length)
+      );
+    };
 
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x333333);
+    const init = () => {
+      camera = new THREE.PerspectiveCamera(
+        60,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000.0
+      );
+      camera.position.set(0, 15, 15);
 
-        scene.add(new THREE.HemisphereLight(0xffffcc, 0x19bbdc, 1));
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x333333);
 
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
+      scene.add(new THREE.HemisphereLight(0xffffcc, 0x19bbdc, 1));
 
-        document.body.appendChild(renderer.domElement);
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
 
-        controls = new OrbitControls(camera, renderer.domElement);
+      document.body.appendChild(renderer.domElement);
 
-        createWorld();
-      };
+      controls = new OrbitControls(camera, renderer.domElement);
 
-      const animate = () => {
-        requestAnimationFrame(animate);
+      createWorld();
+    };
 
-        controls.update();
+    const animate = () => {
+      requestAnimationFrame(animate);
 
-        renderer.render(scene, camera);
-      };
+      controls.update();
 
-      init();
-      animate();
-    </script>
-  </body>
+      renderer.render(scene, camera);
+    };
+
+    init();
+    animate();
+  </script>
+</body>
+
 </html>
