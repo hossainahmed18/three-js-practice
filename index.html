@@ -24,74 +24,35 @@
 
       houseGroup.add(house);
       scene.add(houseGroup);
-      const geometry = new THREE.BufferGeometry();
-      let x1 = 2;
-      let x2 = 12;
-      let y1 = 0;
-      let y2 = 5;
-      let z = 2;
+     
 
-
-      const vertices = new Float32Array([
-        // front
-        x1, y1, z,
-        x2, y1, z,
-        x1, y2, z,
-
-        x1, y2, z,
-        x2, y1, z,
-        x2, y2, z,
-
-        // right
-        x2, y1, z,
-        x2, y1, 0,
-        x2, y2, z,
-
-        x2, y2, z,
-        x2, y1, 0,
-        x2, y2, 0,
-
-        
-        // back
-        x2, y1, 0,
-        x1, y1, 0,
-        x2, y2, 0,
-
-        x2, y2, 0,
-        x1, y1, 0,
-        x1, y2, 0,
-
-        // left
-        x1, y1, 0,
-        x1, y1, z,
-        x1, y2, 0,
-
-        x1, y2, 0,
-        x1, y1, z,
-        x1, y2, z,
-        // top
-        x2, y2, 0,
-        x1, y2, 0,
-        x2, y2, z,
-
-        x2, y2, z,
-        x1, y2, 0,
-        x1, y2, z
-      ]);
-
-
-
-      geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
-      const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-      const mesh1 = new THREE.Mesh(geometry, material);
-      house.add(mesh1);
-
+      var points = [
+        {
+          x1: 2,
+          x2: 12,
+          z1: 0,
+          z2: 0.5
+        },
+        {
+          x1: 2,
+          x2: 12,
+          z1: 3,
+          z2: 3.5
+        }
+      ]
+      for (let i = 0; i < points.length; i++) {
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.BufferAttribute(createWall(points[i].x1, points[i].x2, points[i].z1, points[i].z2), 3));
+        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const mesh1 = new THREE.Mesh(geometry, material);
+        house.add(mesh1);
+      }
       const ground = new THREE.Mesh(
         new THREE.PlaneBufferGeometry(30, 30),
         new THREE.MeshStandardMaterial({ color: 0xffff99 })
       );
       ground.rotateX(-Math.PI / 2);
-     // ground.translateZ(-1);
+      // ground.translateZ(-1);
       houseGroup.add(ground);
 
       house.traverse((mesh) =>
@@ -105,6 +66,61 @@
         (mesh, index) => (mesh.visible = index < house.children.length)
       );
     };
+
+
+    function createWall(x1,x2, z1,z2)  {
+      let y1 = 0;
+      let y2 = 5;
+      let z = 0.5;
+      const vertices = new Float32Array([
+        // front
+        x1, y1, z2,
+        x2, y1, z2,
+        x1, y2, z2,
+
+        x1, y2, z2,
+        x2, y1, z2,
+        x2, y2, z2,
+
+        // right
+        x2, y1, z2,
+        x2, y1, z1,
+        x2, y2, z2,
+
+        x2, y2, z2,
+        x2, y1, z1,
+        x2, y2, z1,
+
+
+        // back
+        x2, y1, z1,
+        x1, y1, z1,
+        x2, y2, z1,
+
+        x2, y2, z1,
+        x1, y1, z1,
+        x1, y2, z1,
+
+        // left
+        x1, y1, z1,
+        x1, y1, z2,
+        x1, y2, z1,
+
+        x1, y2, z1,
+        x1, y1, z2,
+        x1, y2, z2,
+        // top
+        x2, y2, z1,
+        x1, y2, z1,
+        x2, y2, z2,
+
+        x2, y2, z2,
+        x1, y2, z1,
+        x1, y2, z2
+      ]);
+      return vertices;
+
+    }
 
     const init = () => {
       camera = new THREE.PerspectiveCamera(
