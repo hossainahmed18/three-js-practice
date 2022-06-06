@@ -29,33 +29,57 @@
       var points = [
         {
           x1: 2,
-          x2: 12,
+          x2: 20,
           y1: 0,
-          y2: 0.5
-        },
-        {
-          x1: 2,
-          x2: 2.5,
-          y1: 0.5,
-          y2: 3.5
-        },
-        {
-          x1: 2,
-          x2: 12,
-          y1: 3,
-          y2: 3.5
-        },
-        {
-          x1: 12,
-          x2: 11.5,
-          y1: 3.0,
           y2: 0
+        },
+        {
+          x1: 2,
+          x2: 2,
+          y1: 0,
+          y2: 10
+        },
+        {
+          x1: 2,
+          x2: 20,
+          y1: 10,
+          y2: 10
+        },
+        {
+          x1: 20,
+          x2: 20,
+          y1: 10,
+          y2: 0
+        },
+        {
+          x1: 10,
+          x2: 10,
+          y1: 0,
+          y2: 10
         }
       ]
-      drawWall(house, points);
+      var newPoints=[];
+      var minX =  Math.min(...points.map(o => o.x1));
+      var maxX =  Math.max(...points.map(o => o.x2));
+
+      for (let i = 0; i < points.length; i++) {
+        let point = points[i];
+        
+        if(point.x1 == point.x2 && point.x2 == maxX){
+          point.x2 = point.x2-0.5;
+        }
+        else if(point.x1 == point.x2){
+          point.x2 = point.x2+0.5;
+        }
+        if(point.y1 == point.y2 ){
+          point.y2 = point.y2+0.5;
+        }
+        newPoints.push(point);
+      }
+      drawWall(house, newPoints);
 
       const ground = new THREE.Mesh(
-        new THREE.PlaneBufferGeometry(30, 30),
+        new THREE.PlaneBufferGeometry(50, 50),
         new THREE.MeshStandardMaterial({ color: 0xffff99 })
       );
       ground.rotateX(-Math.PI / 2);
@@ -84,9 +108,8 @@
       }
     }
 
-    function createWall(x1,x2, z1,z2)  {
-      let y1 = 0;
-      let y2 = 5;
+    function createWall(x1,x2, z1,z2,y1 =0,y2 =5 )  {
+      
       const vertices = new Float32Array([
         // front
         x1, y1, z2,
