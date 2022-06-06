@@ -52,13 +52,8 @@
           y2: 0
         }
       ]
-      for (let i = 0; i < points.length; i++) {
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute("position", new THREE.BufferAttribute(createWall(points[i].x1, points[i].x2, points[i].y1, points[i].y2), 3));
-        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        const mesh1 = new THREE.Mesh(geometry, material);
-        house.add(mesh1);
-      }
+      drawWall(house, points);
+
       const ground = new THREE.Mesh(
         new THREE.PlaneBufferGeometry(30, 30),
         new THREE.MeshStandardMaterial({ color: 0xffff99 })
@@ -79,10 +74,19 @@
       );
     };
 
+    function drawWall(house, points){
+      for (let i = 0; i < points.length; i++) {
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.BufferAttribute(createWall(points[i].x1, points[i].x2, points[i].y1, points[i].y2), 3));
+        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const mesh1 = new THREE.Mesh(geometry, material);
+        house.add(mesh1);
+      }
+    }
+
     function createWall(x1,x2, z1,z2)  {
       let y1 = 0;
       let y2 = 5;
-
       const vertices = new Float32Array([
         // front
         x1, y1, z2,
@@ -140,7 +144,7 @@
         0.1,
         1000.0
       );
-      camera.position.set(0, 15, 15);
+      camera.position.set(0, 50, 15);
 
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x333333);
