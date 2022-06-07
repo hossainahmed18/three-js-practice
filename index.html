@@ -41,16 +41,16 @@
           }
           jsonArray = JSON.parse(event.target.result).response;
           newPoints1 = Object.values(jsonArray);
-          minX = Math.min(...newPoints1.map(o => o.coordinates.x1)) / 5;
-          maxX = Math.max(...newPoints1.map(o => o.coordinates.x2)) / 5;
-          maxY = Math.max(...newPoints1.map(o => o.coordinates.y2)) / 5;
+          minX = Math.min(...newPoints1.map(o => o.coordinates.x1));
+          maxX = Math.max(...newPoints1.map(o => o.coordinates.x2));
+          maxY = Math.max(...newPoints1.map(o => o.coordinates.y2));
 
           newPoints1 = newPoints1.map(o => {
             let point = o;
-            point.coordinates.x1 = point.coordinates.x1 / 5;
-            point.coordinates.x2 = point.coordinates.x2 / 5;
-            point.coordinates.y1 = point.coordinates.y1 / 5;
-            point.coordinates.y2 = point.coordinates.y2 / 5;
+            point.coordinates.x1 = point.coordinates.x1 / 3;
+            point.coordinates.x2 = point.coordinates.x2 / 3;
+            point.coordinates.y1 = point.coordinates.y1 / 3;
+            point.coordinates.y2 = point.coordinates.y2 / 3;
 
             if ( point.coordinates.x1 ==  point.coordinates.x2) {
               point.coordinates.x2 =  point.coordinates.x2 - 1;
@@ -118,14 +118,14 @@
     function drawWall(house, points) {
       for (let i = 0; i < points.length; i++) {
         const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute("position", new THREE.BufferAttribute(createWall(points[i].coordinates.x1, points[i].coordinates.x2, points[i].coordinates.y1, points[i].coordinates.y2), 3));
+        geometry.setAttribute("position", new THREE.BufferAttribute(createWall(points[i].coordinates.x1-80, points[i].coordinates.x2-80, points[i].coordinates.y1-100, points[i].coordinates.y2-100), 3));
         const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         const mesh1 = new THREE.Mesh(geometry, material);
         house.add(mesh1);
       }
     }
 
-    function createWall(x1, x2, z1, z2, y1 = 0, y2 = 15) {
+    function createWall(x1, x2, z1, z2, y1 = 0, y2 = 25) {
 
       const vertices = new Float32Array([
         // front
@@ -181,9 +181,9 @@
         60,
         window.innerWidth / window.innerHeight,
         0.1,
-        10000.0
+        1000.0
       );
-      camera.position.set(maxX / 2, maxY + 50, 10);
+      camera.position.set(maxX, maxY+50, 10);
 
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x333333);
