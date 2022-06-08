@@ -9,24 +9,24 @@
       margin: 0;
     }
   </style>
-
 </head>
-
 <body>
   <div class="col-md-2 row" style="margin-top: 20px;">
     <label>Upload Json</label>
     <input id="contentFile" type="file" accept="application/json" />
+    <button onclick="changePosition('up')">Up</button>
+    <button onclick="changePosition('down')">Down</button>
+    <button onclick="changePosition('left')">Left</button>
+    <button onclick="changePosition('right')">Right</button>
   </div>
-
   <script type="module">
     import * as THREE from "./static/Three.js";
     import { OrbitControls } from "./static/OrbitControls.js";
 
-    let camera, scene, renderer, controls, mesh, jsonArray, newPoints, newPoints1;
+    let camera, scene, renderer, controls, mesh, jsonArray, processedPoints, ground, houseGroup;
     let maxX, minX, maxY;
-
     document.getElementById('contentFile').onchange = function (evt) {
-      newPoints1 = [];
+      processedPoints = [];
       try {
         let files = evt.target.files;
         if (!files.length) {
@@ -36,27 +36,27 @@
         let file = files[0];
         let reader = new FileReader();
         reader.onload = (event) => {
-          if(renderer){
+          if (renderer) {
             renderer.clear();
           }
           jsonArray = JSON.parse(event.target.result).response;
-          newPoints1 = Object.values(jsonArray);
-          minX = Math.min(...newPoints1.map(o => o.coordinates.x1));
-          maxX = Math.max(...newPoints1.map(o => o.coordinates.x2));
-          maxY = Math.max(...newPoints1.map(o => o.coordinates.y2));
+          processedPoints = Object.values(jsonArray);
+          minX = Math.min(...processedPoints.map(o => o.coordinates.x1));
+          maxX = Math.max(...processedPoints.map(o => o.coordinates.x2));
+          maxY = Math.max(...processedPoints.map(o => o.coordinates.y2));
 
-          newPoints1 = newPoints1.map(o => {
-            let point = o;
+          processedPoints = processedPoints.map(item => {
+            let point = item;
             point.coordinates.x1 = point.coordinates.x1 / 3;
             point.coordinates.x2 = point.coordinates.x2 / 3;
             point.coordinates.y1 = point.coordinates.y1 / 3;
             point.coordinates.y2 = point.coordinates.y2 / 3;
 
-            if ( point.coordinates.x1 ==  point.coordinates.x2) {
-              point.coordinates.x2 =  point.coordinates.x2 - 1;
+            if (point.coordinates.x1 == point.coordinates.x2) {
+              point.coordinates.x2 = point.coordinates.x2 - 1;
             }
-            if ( point.coordinates.y1 ==  point.coordinates.y2) {
-              point.coordinates.y2 =  point.coordinates.y2 + 1;
+            if (point.coordinates.y1 == point.coordinates.y2) {
+              point.coordinates.y2 = point.coordinates.y2 + 1;
             }
             return point;
           })
@@ -68,57 +68,32 @@
         console.error(err);
       }
     }
-    var ShowFloorPlan = function (result) {
-      var jsonArray = result.response;
-
-      for (var key in jsonArray) {
-        var coordinates = jsonArray[key].coordinates;
-        var type = jsonArray[key].type;
-        if (type == 'door') {
-          material = new MeshLineMaterial({ color: new THREE.Color(0xFF0000), lineWidth: 5 });
-        }
-        else if (type == 'window') {
-          material = new MeshLineMaterial({ color: new THREE.Color(0x00FF00), lineWidth: 5 });
-        }
-        else {
-          material = new MeshLineMaterial({ color: new THREE.Color(0x0000ff), lineWidth: 5 });
-        }
-      }
-    }
-
-
     const createWorld = () => {
-      const houseGroup = new THREE.Group();
+      houseGroup = new THREE.Group();
       const house = new THREE.Object3D();
-
       houseGroup.add(house);
       scene.add(houseGroup);
-      drawWall(house, newPoints1);
+      drawWall(house, processedPoints);
 
-      const ground = new THREE.Mesh(
+      ground = new THREE.Mesh(
         new THREE.PlaneBufferGeometry(200, 300),
         new THREE.MeshStandardMaterial({ color: 0xffff99 })
       );
       ground.rotateX(-Math.PI / 2);
-      // ground.translateZ(-1);
+      ground.position.set(maxX / 5, 0, 100);
       houseGroup.add(ground);
 
-      house.traverse((mesh) =>
-        mesh !== house ? (mesh.visible = false) : null
-      );
-
+     
       mesh = [houseGroup, house];
-
       camera.lookAt(houseGroup.position);
-      house.children.forEach(
-        (mesh, index) => (mesh.visible = index < house.children.length)
-      );
+
+      
     };
 
     function drawWall(house, points) {
       for (let i = 0; i < points.length; i++) {
         const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute("position", new THREE.BufferAttribute(createWall(points[i].coordinates.x1-80, points[i].coordinates.x2-80, points[i].coordinates.y1-100, points[i].coordinates.y2-100), 3));
+        geometry.setAttribute("position", new THREE.BufferAttribute(createWall(points[i].coordinates.x1, points[i].coordinates.x2, points[i].coordinates.y1, points[i].coordinates.y2), 3));
         const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         const mesh1 = new THREE.Mesh(geometry, material);
         house.add(mesh1);
@@ -183,7 +158,7 @@
         0.1,
         1000.0
       );
-      camera.position.set(maxX, maxY+50, 10);
+      camera.position.set(maxX, maxY + 50, 10);
 
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x333333);
@@ -194,20 +169,32 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
 
       document.body.appendChild(renderer.domElement);
-
       controls = new OrbitControls(camera, renderer.domElement);
-
       createWorld();
+
     };
 
     const animate = () => {
       requestAnimationFrame(animate);
-
       controls.update();
-
       renderer.render(scene, camera);
     };
+
+    window.changePosition = function (direction) {
+      var currentPosition = houseGroup.position;
+      if(direction == "up"){
+        houseGroup.position.set(currentPosition.x,currentPosition.y,currentPosition.z-3);
+      }else if(direction == "down"){
+        houseGroup.position.set(currentPosition.x,currentPosition.y,currentPosition.z+3);
+      }else if(direction == "left"){
+        houseGroup.position.set(currentPosition.x-3,currentPosition.y,currentPosition.z);
+      }
+      else if(direction == "right"){
+        houseGroup.position.set(currentPosition.x+3,currentPosition.y,currentPosition.z);
+      }
+    }
   </script>
+
 </body>
 
 </html>
