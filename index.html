@@ -19,13 +19,17 @@
     <button onclick="changePosition('left')">Left</button>
     <button onclick="changePosition('right')">Right</button>
   </div>
+  <div id="render">
+
+  </div>
   <script type="module">
     import * as THREE from "./static/Three.js";
     import { OrbitControls } from "./static/OrbitControls.js";
 
-    let camera, scene, renderer, controls, mesh, jsonArray, processedPoints, ground, houseGroup;
-    let maxX, minX, maxY;
-    document.getElementById('contentFile').onchange = function (evt) {
+    let camera, scene, renderer, controls, mesh, jsonArray, processedPoints, houseGroup;
+    let maxX, minX, maxY,minY;
+
+    document.getElementById('contentFile').onchange = (evt) => {
       processedPoints = [];
       try {
         let files = evt.target.files;
@@ -44,6 +48,7 @@
           minX = Math.min(...processedPoints.map(o => o.coordinates.x1));
           maxX = Math.max(...processedPoints.map(o => o.coordinates.x2));
           maxY = Math.max(...processedPoints.map(o => o.coordinates.y2));
+          minY = Math.min(...processedPoints.map(o => o.coordinates.y1));
 
           processedPoints = processedPoints.map(item => {
             let point = item;
@@ -74,23 +79,18 @@
       houseGroup.add(house);
       scene.add(houseGroup);
       drawWall(house, processedPoints);
-
-      ground = new THREE.Mesh(
-        new THREE.PlaneBufferGeometry(200, 300),
+      const ground = new THREE.Mesh(
+        new THREE.PlaneBufferGeometry(maxX, maxY),
         new THREE.MeshStandardMaterial({ color: 0xffff99 })
       );
       ground.rotateX(-Math.PI / 2);
-      ground.position.set(maxX / 5, 0, 100);
-      houseGroup.add(ground);
+      ground.position.set(minX*5, 0, minY*5);
 
-     
+      houseGroup.add(ground);
       mesh = [houseGroup, house];
       camera.lookAt(houseGroup.position);
-
-      
     };
-
-    function drawWall(house, points) {
+    const drawWall = (house, points) => {
       for (let i = 0; i < points.length; i++) {
         const geometry = new THREE.BufferGeometry();
         geometry.setAttribute("position", new THREE.BufferAttribute(createWall(points[i].coordinates.x1, points[i].coordinates.x2, points[i].coordinates.y1, points[i].coordinates.y2), 3));
@@ -99,9 +99,7 @@
         house.add(mesh1);
       }
     }
-
-    function createWall(x1, x2, z1, z2, y1 = 0, y2 = 25) {
-
+    const createWall = (x1, x2, z1, z2, y1 = 0, y2 = 25) => {
       const vertices = new Float32Array([
         // front
         x1, y1, z2,
@@ -159,7 +157,6 @@
         1000.0
       );
       camera.position.set(maxX, maxY + 50, 10);
-
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x333333);
 
@@ -168,10 +165,10 @@
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
 
-      document.body.appendChild(renderer.domElement);
+      document.getElementById("render").innerHTML = "";
+      document.getElementById("render").appendChild(renderer.domElement);
       controls = new OrbitControls(camera, renderer.domElement);
       createWorld();
-
     };
 
     const animate = () => {
@@ -179,18 +176,21 @@
       controls.update();
       renderer.render(scene, camera);
     };
-
-    window.changePosition = function (direction) {
+    window.changePosition = (direction) => {
       var currentPosition = houseGroup.position;
-      if(direction == "up"){
-        houseGroup.position.set(currentPosition.x,currentPosition.y,currentPosition.z-3);
-      }else if(direction == "down"){
-        houseGroup.position.set(currentPosition.x,currentPosition.y,currentPosition.z+3);
-      }else if(direction == "left"){
-        houseGroup.position.set(currentPosition.x-3,currentPosition.y,currentPosition.z);
-      }
-      else if(direction == "right"){
-        houseGroup.position.set(currentPosition.x+3,currentPosition.y,currentPosition.z);
+      switch (direction) {
+        case "up":
+          houseGroup.position.set(currentPosition.x, currentPosition.y, currentPosition.z - 3);
+          break;
+        case "down":
+          houseGroup.position.set(currentPosition.x, currentPosition.y, currentPosition.z + 3);
+          break;
+        case "left":
+          houseGroup.position.set(currentPosition.x - 3, currentPosition.y, currentPosition.z);
+          break;
+        case "right":
+          houseGroup.position.set(currentPosition.x + 3, currentPosition.y, currentPosition.z);
+          break;
       }
     }
   </script>
