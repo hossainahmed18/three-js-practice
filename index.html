@@ -10,24 +10,25 @@
     }
   </style>
 </head>
+
 <body>
   <div class="col-md-2 row" style="margin-top: 20px;">
     <label>Upload Json</label>
     <input id="contentFile" type="file" accept="application/json" />
-    <button onclick="changePosition('up')">Up</button>
-    <button onclick="changePosition('down')">Down</button>
-    <button onclick="changePosition('left')">Left</button>
-    <button onclick="changePosition('right')">Right</button>
+    <div style="margin-top: 2%; margin-left: 30%;">
+      <button onclick="changePosition('up')">Up</button>
+      <button onclick="changePosition('down')">Down</button>
+      <button onclick="changePosition('left')">Left</button>
+      <button onclick="changePosition('right')">Right</button>
+    </div>
   </div>
-  <div id="render">
-
-  </div>
+  <div id="render"></div>
   <script type="module">
     import * as THREE from "./static/Three.js";
     import { OrbitControls } from "./static/OrbitControls.js";
 
     let camera, scene, renderer, controls, mesh, jsonArray, processedPoints, houseGroup;
-    let maxX, minX, maxY,minY;
+    let maxX, minX, maxY, minY;
 
     document.getElementById('contentFile').onchange = (evt) => {
       processedPoints = [];
@@ -83,8 +84,8 @@
         new THREE.PlaneBufferGeometry(maxX, maxY),
         new THREE.MeshStandardMaterial({ color: 0xffff99 })
       );
-      ground.rotateX(-Math.PI / 2);
-      ground.position.set(minX*5, 0, minY*5);
+      ground.rotateX(3*(Math.PI / 2));
+      ground.position.set(minX * 5, 0, minY * 5);
 
       houseGroup.add(ground);
       mesh = [houseGroup, house];
@@ -180,16 +181,16 @@
       var currentPosition = houseGroup.position;
       switch (direction) {
         case "up":
-          houseGroup.position.set(currentPosition.x, currentPosition.y, currentPosition.z - 3);
+          houseGroup.position.set(currentPosition.x, currentPosition.y, currentPosition.z - 5);
           break;
         case "down":
-          houseGroup.position.set(currentPosition.x, currentPosition.y, currentPosition.z + 3);
+          houseGroup.position.set(currentPosition.x, currentPosition.y, currentPosition.z + 5);
           break;
         case "left":
-          houseGroup.position.set(currentPosition.x - 3, currentPosition.y, currentPosition.z);
+          houseGroup.position.set(currentPosition.x - 5, currentPosition.y, currentPosition.z);
           break;
         case "right":
-          houseGroup.position.set(currentPosition.x + 3, currentPosition.y, currentPosition.z);
+          houseGroup.position.set(currentPosition.x + 5, currentPosition.y, currentPosition.z);
           break;
       }
     }
